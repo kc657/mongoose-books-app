@@ -37,11 +37,8 @@ app.get('/', function (req, res) {
 // get all books
 app.get('/api/books', function (req, res) {
   // send all books as JSON response
-  db.Book.find(function (err, books) {
-    if (err) {
-      console.log('index error ' + err)
-      res.sendStatus(500)
-    }
+  db.Book.find().populate('author').exec(function (err, books) {
+    if (err) { return console.log('index error: ' + err) }
     res.json(books)
   })
 })
@@ -51,7 +48,7 @@ app.get('/api/books/:id', function (req, res) {
   // find one book by its id
   console.log('books show', req.params)
   var newBook = req.params.id
-  db.Book.findOne({_id: newBook}, function (err, books) {
+  db.Book.findOne({_id: newBook}).populate('author').exec(function (err, books) {
     if (err) {
       console.log('Find by ID error ' + err)
       res.sendStatus(500)
@@ -64,27 +61,46 @@ app.get('/api/books/:id', function (req, res) {
 app.post('/api/books', function (req, res) {
   // create new book with form data (`req.body`)
   console.log('books create', req.body)
-  var newBook = db.Book(req.body)
-  newBook.save(function (err, book) {
-    if (err) {
-      console.error('no new book')
-    }
-    res.json(book)
+  var newBook = db.Book({
+    title: req.body.title,
+    image: req.body.image,
+    releaseDate: req.body.releaseDate,
+    author: req.body.author
   })
+  // db.Author.findOne({name: req.body.author}, function (err, author) {
+  //   newBook.author = author
+  //   newBook.save(function (err, book) {
+  //     if (err) { console.log('error') }
+  //     res.json(book)
+  //   })
+  // })
+  db.Author.findOne({name:req.body.author}).populate('author').exec(function (err, author) {
+    newBook.author = author
+    newBook.save(function (err, book) {
+      if (err) { console.log('error') }
+      res.json(book)
+    })
+  })
+  // db.Author.create({name: req.body.author}).exec(function(err, book){
+  //   if (err) {
+  //     console.log("error");
+  //   }
+  //   res.json(book)
+  // })
 })
 
-// update book
-app.put('/api/books/:id', function (req, res) {
-// get book id from url params (`req.params`)
-  console.log('books update', req.params)
-  var bookUpdateId = req.params.id
-  db.Book.findOneAndUpdate({_id: bookUpdateId},
-    {
-    author: req.body.author,
-    title: req.body.title
-  },{new:true});
-  res.json(bookUpdateId);
-});
+// // update book
+// app.put('/api/books/:id', function (req, res) {
+// // get book id from url params (`req.params`)
+//   console.log('books update', req.params)
+//   var bookUpdateId = req.params.id
+//   db.Book.findOneAndUpdate({_id: bookUpdateId},
+//     {
+//       author: req.body.author,
+//       title: req.body.title
+//     }, {new: true})
+//   res.json(bookUpdateId)
+// })
 
 // delete book
 app.delete('/api/books/:id', function (req, res) {

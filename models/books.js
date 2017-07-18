@@ -1,11 +1,15 @@
 let mongoose = require('mongoose')
+  Schema = mongoose.Schema;
 
-let BookSchema = new mongoose.Schema ({
-  author: String,
+let BookSchema = new Schema({
   title: String,
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'Author'
+  },
   image: String,
   releaseDate: String
-})
+});
 
 let Book = mongoose.model('Book', BookSchema)
 
