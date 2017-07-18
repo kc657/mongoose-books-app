@@ -12,6 +12,7 @@ $(document).ready(function(){
     error: handleError
   });
 
+
   $('#newBookForm').on('submit', function(e) {
     e.preventDefault();
     $.ajax({
@@ -32,6 +33,13 @@ $(document).ready(function(){
       error: deleteBookError
     });
   });
+
+  // $.ajax({
+  //   method: 'PUT',
+  //   url: '/api/books/',
+  //   success: console.log("hi"),
+  //   error: console.log("bye");
+  // })
 
 });
 
